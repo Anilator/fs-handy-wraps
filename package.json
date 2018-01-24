@@ -1,0 +1,25 @@
+{
+  "name": "fs-handy-wraps",
+  "version": "1.0.0",
+  "description": "Handy wraps for some Node.js FS functions",
+  "main": "files.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anilator/fs-handy-wraps.git"
+  },
+  "keywords": [
+    "files",
+    "wraps",
+    "functions",
+    "callbacks"
+  ],
+  "author": "Evgenii Klimov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Anilator/fs-handy-wraps/issues"
+  },
+  "homepage": "https://github.com/Anilator/fs-handy-wraps#readme"
+}
