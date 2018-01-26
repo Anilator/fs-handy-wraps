@@ -46,9 +46,9 @@ function appendToFile(path, text, successCallback, errCallback) {
         text,
         (err) => {
             if (err) {
-                errCallback ? errCallback() : console.error('files__append ERROR:', err);
+                errCallback ? errCallback() : console.error('files__append ERROR:', err);  // ---------------------> exit (unable to append)
             } else {
-                successCallback && successCallback();
+                successCallback && successCallback();  // ---------------------> exit (file is successfully appended)
             }
         }
     )
@@ -76,23 +76,28 @@ function readOrMake(path, readCallback, makeCallback) {
     }
 }
 function watchFileChanges(path, callback) {
+    if (!path || !callback) return console.error('files__watchFileChanges arguments ERROR: "path" and "callback" are required');
+
     let timer;
 
     FS.watch(path, () => {
         if ((timer) && (!timer._called)) return; // Removes duplicated fire (FS.watch bug)
 
-        timer = setTimeout(callback, 30);
+        timer = setTimeout(callback, 30);  // ---------------------> exit ( file was changed -> 30ms -> callback execution )
     });
 }
-function getConfig(pathToConfig, successCallback, errCallback) {
-    if (!pathToConfig || !successCallback) return console.error('files__getConfig arguments ERROR: "pathToConfig" and "successCallback" are required');
+function getConfig(pathToConfig, CLIQuestions, successCallback, errCallback) {
+    if (!pathToConfig || !CLIQuestions || !successCallback) return console.error('files__getConfig arguments ERROR: "pathToConfig", "CLIQuestions" and "successCallback" are required');
+
+    /*
+    const CLIQuestions_EXAMPLE = [
+        { prop: 'pathToBase',       question: 'Full path to database file:',        def: '/base.txt' },
+        { prop: 'pathToNotefile',   question: 'Path to temp file:',                 def: '/note.txt' },
+        { prop: 'editor',           question: 'Command to open your text editor:',  def: 'subl' },
+    ];
+    */
 
     const configFilePath = pathToConfig;
-    const CLIQuestions = [
-        { prop: 'dbPath', question: 'New config will be created. \nPath to database file:' },
-        { prop: 'tempPath', question: 'Path to temp file:' },
-        { prop: 'editor', question: 'Command to open your text editor:' },
-    ];
     const CLIAnswers = {};
     let currentLine = CLIQuestions.shift();
 
@@ -126,7 +131,7 @@ function getConfig(pathToConfig, successCallback, errCallback) {
 
 
         function ask(answer) {
-            CLIAnswers[currentLine.prop] = answer;
+            CLIAnswers[currentLine.prop] = answer ? answer : currentLine.def;   // Results
 
             if (CLIQuestions.length) {
                 currentLine = CLIQuestions.shift();
@@ -145,6 +150,7 @@ function getConfig(pathToConfig, successCallback, errCallback) {
     }
 }
 
+
 module.exports = {
     'check': checkFileExistence,
     'read': readFile,
@@ -154,3 +160,4 @@ module.exports = {
     'watch': watchFileChanges,
     'getConfig': getConfig,
 }
+
