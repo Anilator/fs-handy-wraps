@@ -2,7 +2,7 @@ const FS = require('fs');
 
 
 function checkFileExistence(path, existCallback, absentCallback) {
-    if (!existCallback || !absentCallback) return console.error('files__checkFileExistence arguments ERROR: all callbacks are required');
+    if (!path || !existCallback || !absentCallback) return console.error('files__checkFileExistence arguments ERROR: all arguments are required');
     FS.stat(path, (err) => {
         if (!err) {
             existCallback(path);  // ---------------------> exit (file exists)
@@ -41,9 +41,10 @@ function writeFile(path, text, successCallback, errCallback) {
 function appendToFile(path, text, successCallback, errCallback) {
     if (!path) return console.error('files__append arguments ERROR: "path" is required');
 
+    const content = text || '';
     FS.appendFile(
         path,
-        text,
+        content,
         (err) => {
             if (err) {
                 errCallback ? errCallback() : console.error('files__append ERROR:', err);  // ---------------------> exit (unable to append)
