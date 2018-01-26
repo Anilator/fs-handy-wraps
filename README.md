@@ -1,5 +1,8 @@
-# fs-handy-wraps
+# npm i -S fs-handy-wraps
 Handy wraps for some Node.js FileSystem functions.
+
+
+.
 
 
 ## Read and Write files
@@ -19,6 +22,10 @@ Handy wraps for some Node.js FileSystem functions.
 > Reads the file if it exists.
 > Creates a new empty file if a file specified by `path` does not exist and `makeCallback` is not specified.
 > Executes `makeCallback` if the file does not exist and `makeCallback` is specified.
+
+
+
+.
 
 
 ## Create a JSON config-file using simple CLI
