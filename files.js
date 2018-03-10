@@ -54,25 +54,24 @@ function appendToFile(path, text, successCallback, errCallback) {
         }
     )
 }
-function readOrMake(path, readCallback, makeCallback) {
-    if (!path || !readCallback) return console.error('files__readOrMake arguments ERROR: "path" and "readCallback" are required');
+function readOrMake(path, readCallback, makeCallback, newFileContent) {
+    if (!path || !readCallback || !makeCallback) 
+        return console.error('files__readOrMake arguments ERROR: "path", "readCallback" and "makeCallback" are required');
 
-    const makeFileCallback = makeCallback || makeEmptyFile;
+    let content = newFileContent || '';
 
-
-    checkFileExistence(
+    checkFileExistence (
         path,
-        () => { readFile(path, readCallback) },  // ---------------------> exit (file is exist)
-        makeFileCallback  // ---------------------> exit (new file will be made by makeCallback)
+        () => readFile (path, readCallback),  // ------------------> exit (file is exist and will be read)
+        () => makeNewFile () // -----------------------------------> exit (new file will be made by makeCallback)
     );
 
 
-    function makeEmptyFile(path) {
-        console.log('NEW FILE!');
-        writeFile(
+    function makeNewFile () {
+        writeFile (
             path,
-            '',
-            () => readCallback('')  // ---------------------> exit (new empty file created)
+            content,
+            () => makeCallback (path, content)  // ---------------> exit (new file created)
         );
     }
 }
@@ -87,8 +86,9 @@ function watchFileChanges(path, callback) {
         timer = setTimeout(callback, 30);  // ---------------------> exit ( file was changed -> 30ms -> callback execution )
     });
 }
-function getConfig(pathToConfig, CLIQuestions, successCallback, errCallback) {
-    if (!pathToConfig || !CLIQuestions || !successCallback) return console.error('files__getConfig arguments ERROR: "pathToConfig", "CLIQuestions" and "successCallback" are required');
+function getConfig(path, CLIQuestions, successCallback, errCallback) {
+    if (!path || !CLIQuestions || !successCallback) 
+        return console.error('files__getConfig arguments ERROR: "path", "CLIQuestions" and "successCallback" are required');
 
     /*
     const CLIQuestions_EXAMPLE = [
@@ -98,22 +98,23 @@ function getConfig(pathToConfig, CLIQuestions, successCallback, errCallback) {
     ];
     */
 
-    const configFilePath = pathToConfig;
     const CLIAnswers = {};
     let currentLine = CLIQuestions.shift();
 
 
-    readOrMake(
-        configFilePath,
-        checkConfigReadability,
+    checkFileExistence (
+        path,
+        () => readFile (path, checkConfigReadability),
         createConfig
     );
 
 
     function checkConfigReadability(content) {
         try {
-            const parsedConfig = JSON.parse(content);
-            successCallback(parsedConfig);  // ---------------------> exit (parsed config goes outside)
+            const parsedConfig = JSON.parse (content);
+            process.nextTick (
+                () => successCallback (parsedConfig)  // ---------------------> exit (parsed config goes outside)
+            );
         } catch (e) {
             console.error('files__getConfig ERROR: config-file contains non correct JSON\n', e);
 
@@ -142,9 +143,9 @@ function getConfig(pathToConfig, CLIQuestions, successCallback, errCallback) {
                 const configContent = JSON.stringify(CLIAnswers);
 
                 writeFile(
-                    configFilePath,
+                    path,
                     configContent,
-                    () => successCallback(CLIAnswers)  // ---------------------> exit (new config data goes outside)
+                    () => successCallback (CLIAnswers)  // ---------------------> exit (new config data goes outside)
                 );
             }
         }
@@ -161,4 +162,3 @@ module.exports = {
     'watch': watchFileChanges,
     'getConfig': getConfig,
 }
-

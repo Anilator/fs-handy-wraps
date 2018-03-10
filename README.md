@@ -19,7 +19,7 @@ A pretty simple library.
 **append** (path[, text, successCallback, errCallback])
 > Appends `text` or an empty string to the end of the file.
 
-**readOrMake** (path, readCallback[, makeCallback])
+**readOrMake** (path, readCallback[, makeCallback]) //CHANGED
 > Reads the file if it exists.  
 > Creates a new empty file if a file specified by `path` does not exist and `makeCallback` is not specified.  
 > Executes `makeCallback` if the file does not exist and `makeCallback` is specified.

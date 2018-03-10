@@ -1,6 +1,6 @@
 {
   "name": "fs-handy-wraps",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Handy wraps for some Node.js FS functions",
   "main": "files.js",
   "scripts": {
