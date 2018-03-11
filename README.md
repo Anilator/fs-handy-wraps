@@ -13,6 +13,9 @@ A pretty simple library.
 **read** (path, successCallback[, errCallback])
 > Reads the file contents.
 
+**makeDir** (path, successCallback[, errCallback])
+> Creates a directory specified by `path` with `0777` rights.
+
 **write** (path[, text, successCallback, errCallback])
 > Rewrites the file content by `text` or an empty string. Also may be used for a new file creation.
 
@@ -21,33 +24,26 @@ A pretty simple library.
 
 **readOrMake** (path, readCallback, makeCallback[, newFileContent])
 > Reads the file if it exists and calls readCallback then.  
-> Creates a new file if a file specified by `path` does not exist and fills it by `newFileContent` if specified and executes `makeCallback` then.
+> Creates a new file if a file specified by `path` does not exist and fills it by `newFileContent` if specified and executes `makeCallback (path, newFileContent)` then.
 
 
 .
 
 
-## Read or Create a JSON config-file using simple CLI //CHANGED
-**getConfig** (path, CLIQuestions, successCallback[, errCallback])
-> Reads the `path` file, checks if for JSON errors and calls `successCallback(configContent)`.  
-> Launches simple CLI according to `CLIQuestions` if `path` file does not exist.  
-Example for `CLIQuestions` argument:  
+## Read or Create a JSON config-file using simple CLI
+**getConfig** (path, successCallback[, defaultValues, CLIQuestions, errCallback])
+> Reads the `path` file, checks if for JSON errors and calls `successCallback (parsedConfig)`.  
+> Launches a simple CLI according to `CLIQuestions` if the `path` file does not exist.  
+Example for `CLIQuestions` object:  
 ```js
 const CLIQuestions_EXAMPLE = [
-    { prop: 'pathToBase',       question: 'Full path to database file:',        def: '/base.txt' },
-    { prop: 'pathToNotefile',   question: 'Path to temp file:',                 def: '/note.txt' },
-    { prop: 'editor',           question: 'Command to open your text editor:',  def: 'subl' },
+    { prop: 'pathToBase',       question: 'Full path to database file:' },
+    { prop: 'pathToNotefile',   question: 'Path to temp file:' },
+    { prop: 'editor',           question: 'Command to open your text editor:' },
 ];
 ```
-The config-file will be created based on this example in case a user skips all questions:
-```js
-{
-    "pathToBase": "/base.txt",
-    "pathToNotefile": "/note.txt",
-    "editor": "subl"
-}
-```
-A callback `successCallback(configContent)` will be executed after the config creation finishes.
+It asks `CLIQuestions` to user, then assigns received values to a `defaultValues` object.
+A callback `successCallback (config)` will be executed in the result.
 
 .
 
@@ -66,18 +62,26 @@ start();
 
 const FILE = require('fs-handy-wraps');
 const configPath = '~/config.json';
+const configDefaults = {
+    base: '~/base.txt',
+    name: 'My new Project'
+};
 const cli = [
-    { prop: 'base',   question: 'Where to store the database?',        def: '~/base.txt' },
-    { prop: 'name',   question: 'What is the name of your Project?',   def: 'My new Project' },
+    { prop: 'base',   question: 'Where to store the database?' },
+    { prop: 'name',   question: 'What is the name of your Project?' },
 ];
 
 function start() {
-    FILE.getConfig(configPath, cli, checkBase);
+    FILE.getConfig (configPath, checkBase, configDefaults, cli);
 }
-function checkBase(config) {
-    FILE.readOrMake(config.base, parseBase);
+function checkBase (config) {
+    FILE.readOrMake (config.base, parseBase, newBaseCreated);
 }
-function parseBase(baseContent) {
-    // do something with base content ...
+function parseBase (baseContent) {
+    // do something...
+}
+function newBaseCreated () {
+    // do something with empty base...
 }
 ```
+
