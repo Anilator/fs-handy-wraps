@@ -19,19 +19,18 @@ A pretty simple library.
 **append** (path[, text, successCallback, errCallback])
 > Appends `text` or an empty string to the end of the file.
 
-**readOrMake** (path, readCallback[, makeCallback]) //CHANGED
-> Reads the file if it exists.  
-> Creates a new empty file if a file specified by `path` does not exist and `makeCallback` is not specified.  
-> Executes `makeCallback` if the file does not exist and `makeCallback` is specified.
+**readOrMake** (path, readCallback, makeCallback[, newFileContent])
+> Reads the file if it exists and calls readCallback then.  
+> Creates a new file if a file specified by `path` does not exist and fills it by `newFileContent` if specified and executes `makeCallback` then.
 
 
 .
 
 
-## Create a JSON config-file using simple CLI
-**getConfig** (pathToConfig, CLIQuestions, successCallback[, errCallback])
-> Reads the `pathToConfig` file, checks if for JSON errors and calls `successCallback(configContent)`.  
-> Launches simple CLI according to `CLIQuestions` if `pathToConfig` file does not exist.  
+## Read or Create a JSON config-file using simple CLI //CHANGED
+**getConfig** (path, CLIQuestions, successCallback[, errCallback])
+> Reads the `path` file, checks if for JSON errors and calls `successCallback(configContent)`.  
+> Launches simple CLI according to `CLIQuestions` if `path` file does not exist.  
 Example for `CLIQuestions` argument:  
 ```js
 const CLIQuestions_EXAMPLE = [
@@ -40,7 +39,7 @@ const CLIQuestions_EXAMPLE = [
     { prop: 'editor',           question: 'Command to open your text editor:',  def: 'subl' },
 ];
 ```
-The config-file will be created based on this example in case user skips all questions:
+The config-file will be created based on this example in case a user skips all questions:
 ```js
 {
     "pathToBase": "/base.txt",
@@ -48,14 +47,14 @@ The config-file will be created based on this example in case user skips all que
     "editor": "subl"
 }
 ```
-After the config creation finishes, a callback `successCallback(configContent)` will be executed.
+A callback `successCallback(configContent)` will be executed after the config creation finishes.
 
 .
 
 
 ## Watching on file changes
 **watch** (path, callback)
-> Creates a Watcher that will call the `callback` every time file `path` is changed.  
+> Creates a Watcher that will call the `callback` every time a file specified by `path` is changed.  
 > There are a 30ms delay between the system event and the callback is called.
 
 .
