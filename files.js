@@ -1,84 +1,145 @@
 const FS = require('fs');
 const READLINE = require('readline');
 
-
-function checkFileExistence(path, existCallback, absentCallback) {
-    if (!path || !existCallback || !absentCallback) return console.error('files__checkFileExistence arguments ERROR: all arguments are required');
-    FS.stat(path, (err) => {
-        if (!err) {
-            existCallback(path);  // ---------------------> exit (file exists)
-        }
-        else if (err && err.code == 'ENOENT') {
-            absentCallback(path);  // ---------------------> exit (file does not exist)
-        }
-    });
+function check (fn) { // all fs-handy functions have required furst argument
+    return function () {
+        if (!arguments[0]) throw 'fs-handy: argument "path" is required';
+        else return fn.apply (this, arguments);
+    };
 }
-function readFile(path, successCallback, errCallback) {
-    if (!path || !successCallback) 
-        return console.error('files__readFile arguments ERROR: "path" and "successCallback" are required');
 
-    FS.readFile (path, 'utf8', (err, content) => {
-        if (err) {
-            errCallback ? errCallback() : console.error ('files__readFile ERROR: ', err);  // ---> exit (unable to read file)
-        } else {
-            successCallback(content);  // -----------------------> exit (file content goes outside)
-        }
-    });
-}
-function makeDir(path, successCallback, errCallback) {
-    if (!path || !successCallback) 
-        return console.error('files__makeDir arguments ERROR: "path" and "successCallback" are required');
 
-    FS.mkdir (path, 0777, err => {
-        if (err) {
-            if (err.code == 'EEXIST') successCallback(); // the folder already exists
-            else errCallback && errCallback(err);        // something went wrong
-        } else successCallback();   // successfully created folder
-    });
-}
-function writeFile(path, text, successCallback, errCallback) {
-    if (!path) return console.error('files__writeFile arguments ERROR: "path" is required');
-
-    const content = text || '';
-    FS.writeFile(path, content, (err) => {
-        if (err) {
-            console.error('files__writeFile ERROR: ', err);
-            errCallback ? errCallback() : console.error ('files__writeFile ERROR: ', err)  // ---> exit (unable to write a file)
-        }
+// PROMISIFIED FUNCTIONS
+function checkFileExistence (path, existCallback, absentCallback) {
+    if (existCallback) {
+        if (!absentCallback) 
+            throw `fs-handy: all arguments are required`;
         else {
-            successCallback && successCallback();  // ----------------> exit (file is successfully rewritten or made)
+            check (existCallback, absentCallback);
+            return this;
         }
-    });
-}
-function appendToFile(path, text, successCallback, errCallback) {
-    if (!path) return console.error('files__append arguments ERROR: "path" is required');
+    } else {
+        return new Promise (check);
+    }
 
-    const content = text || '';
-    FS.appendFile(
-        path,
-        content,
-        (err) => {
-            if (err) {
-                errCallback ? errCallback() : console.error('files__append ERROR:', err);  // ---> exit (unable to append)
-            } else {
-                successCallback && successCallback();  // ---------------------> exit (file is successfully appended)
+    function check (resolve, reject) {
+        FS.stat (path, (err) => {
+            if (!err) resolve (path);  // ----------------------> exit (file exists)
+            else {
+                if (err.code == 'ENOENT') reject (path);  // ---> exit (file does not exist)
+                else throw err;
             }
-        }
-    )
+        });
+    }
 }
-function readOrMake(path, readCallback, makeCallback, newFileContent, errCallback) {
+function makeDirectory (path, successCallback, errCallback) {
+    if (successCallback) {
+        mkd (successCallback);
+        return this;
+    } else {
+        return new Promise (mkd);
+    }
+
+
+    function mkd (resolve, reject) {
+        FS.mkdir (path, 0777, err => {
+            if (err) {
+                if (err.code == 'EEXIST') resolve (path);  // --------> exit (the folder already exists)
+                else {
+                    if (errCallback) return errCallback (err);  // ---> exit (something went wrong)
+                    if (reject) return reject (err);
+                    else throw new Error (`fs-handy: unable to make a directory "${path}"`);
+                }
+            } else resolve (path);   // successfully created folder
+        });
+    }
+}
+function readFile (path, successCallback, errCallback) {
+    if (successCallback) {
+        read (successCallback);
+        return this;
+    } else
+        return new Promise (read);
+
+
+    function read (resolve, reject) {
+        FS.readFile (path, 'utf8', (err, data) => {
+            if (err) {
+                if (errCallback) return errCallback (err);  // ---> exit (unable to read file)
+                if (reject) return reject (err);
+                if (err.code === 'ENOENT')
+                    throw new Error (`fs-handy: file "${path}" not found`);
+                else throw err;
+            } else {
+                resolve (data);  // ------------------------------> exit (file data goes outside)
+            }
+        });
+    }
+}
+function writeFile (path, text, successCallback, errCallback) {
+    const data = text || '';
+
+    if (successCallback || errCallback) {
+        write (successCallback);
+        return this;
+    } else
+        return new Promise (write);
+
+
+    function write (resolve, reject) {
+        FS.writeFile (path, data, (err) => {
+            if (err) {
+                if (errCallback) return errCallback (err);  // ---> exit (unable to write file)
+                if (reject) return reject (err);
+                throw new Error (`fs-handy: unable to write file "${path}"`);
+            }
+            else {
+                resolve && resolve ({ path, data });  // ---------> exit (file is successfully written)
+            }
+        });
+    }
+}
+function appendToFile (path, text, successCallback, errCallback) {
+    const data = text || '';
+
+    if (successCallback || errCallback) {
+        append (successCallback);
+        return this;
+    } else
+        return new Promise (append);
+
+
+    function append (resolve, reject) {
+        FS.appendFile (
+            path,
+            data,
+            err => {
+                if (err) {
+                    if (errCallback) return errCallback (err);  // ---> exit (unable to append file)
+                    if (reject) return reject (err);
+                    throw new Error (`fs-handy: unable to append file "${path}"`);
+                } else {
+                    resolve && resolve ({ path, data });  // ---------> exit (file is successfully appended)
+                }
+            }
+        )
+    }
+}
+
+// NOT PROMISIFIED FUNCTIONS
+function readOrMakeFile(path, readCallback, makeCallback, newFileContent, errCallback) {
     if (!path || !readCallback || !makeCallback) 
-        return console.error('files__readOrMake arguments ERROR: "path", "readCallback" and "makeCallback" are required');
-
+    return console.error('files__readOrMake arguments ERROR: "path", "readCallback" and "makeCallback" are required');
+    
     let content = newFileContent || '';
-
+    
     checkFileExistence (
         path,
         () => readFile (path, readCallback, errCallback),  // -----> exit (file is exist and will be read)
         () => makeNewFile () // -----------------------------------> exit (new file will be made by makeCallback)
     );
-
-
+    
+    
     function makeNewFile () {
         writeFile (
             path,
@@ -180,12 +241,12 @@ function getConfig(path, successCallback, defaultValues, CLIQuestions, errCallba
 
 
 module.exports = {
-    'check': checkFileExistence,
-    'read': readFile,
-    'makeDir': makeDir,
-    'write': writeFile,
-    'append': appendToFile,
-    'readOrMake': readOrMake,
-    'watch': detectFileChanges,
-    'getConfig': getConfig,
+    'check':      check (checkFileExistence),
+    'read':       check (readFile),
+    'makeDir':    check (makeDirectory),
+    'write':      check (writeFile),
+    'append':     check (appendToFile),
+    'readOrMake': check (readOrMakeFile),
+    'watch':      check (detectFileChanges),
+    'getConfig':  check (getConfig),
 }
