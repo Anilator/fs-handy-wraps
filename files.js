@@ -1,7 +1,7 @@
 const FS = require('fs');
 const READLINE = require('readline');
 
-function check (fn) { // all fs-handy functions have required furst argument
+function check (fn) { // all fs-handy functions have the required first argument
     return function () {
         if (!arguments[0]) throw 'fs-handy: argument "path" is required';
         else return fn.apply (this, arguments);
@@ -12,7 +12,7 @@ function check (fn) { // all fs-handy functions have required furst argument
 // PROMISIFIED FUNCTIONS
 function checkFileExistence (path, existCallback, absentCallback) {
     if (existCallback) {
-        if (!absentCallback) 
+        if (!absentCallback)
             throw `fs-handy: all arguments are required`;
         else {
             check (existCallback, absentCallback);
@@ -50,7 +50,9 @@ function makeDirectory (path, successCallback, errCallback) {
                     if (reject) return reject (err);
                     else throw new Error (`fs-handy: unable to make a directory "${path}"`);
                 }
-            } else resolve (path);   // successfully created folder
+            } else {
+                resolve (path);   // successfully created folder
+            }
         });
     }
 }
@@ -128,18 +130,18 @@ function appendToFile (path, text, successCallback, errCallback) {
 
 // NOT PROMISIFIED FUNCTIONS
 function readOrMakeFile(path, readCallback, makeCallback, newFileContent, errCallback) {
-    if (!path || !readCallback || !makeCallback) 
+    if (!path || !readCallback || !makeCallback)
     return console.error('files__readOrMake arguments ERROR: "path", "readCallback" and "makeCallback" are required');
-    
+
     let content = newFileContent || '';
-    
+
     checkFileExistence (
         path,
         () => readFile (path, readCallback, errCallback),  // -----> exit (file is exist and will be read)
         () => makeNewFile () // -----------------------------------> exit (new file will be made by makeCallback)
     );
-    
-    
+
+
     function makeNewFile () {
         writeFile (
             path,
@@ -150,7 +152,7 @@ function readOrMakeFile(path, readCallback, makeCallback, newFileContent, errCal
     }
 }
 function detectFileChanges(path, callback) {
-    if (!path || !callback) 
+    if (!path || !callback)
         return console.error ('files__detectFileChanges arguments ERROR: "path" and "callback" are required');
 
     let timer;
@@ -162,7 +164,7 @@ function detectFileChanges(path, callback) {
     });
 }
 function getConfig(path, successCallback, defaultValues, CLIQuestions, errCallback) {
-    if (!path || !successCallback) 
+    if (!path || !successCallback)
         return console.error('files__getConfig arguments ERROR: "path" and "successCallback" are required');
     /*
     const CLIQuestions_EXAMPLE = [
@@ -190,8 +192,8 @@ function getConfig(path, successCallback, defaultValues, CLIQuestions, errCallba
             );
         } catch (err) {
             // What to do with the broken Config?
-            errCallback ? 
-                errCallback(err) : 
+            errCallback ?
+                errCallback(err) :
                 console.error ('files__getConfig ERROR: config-file contains non correct JSON\n', err);
         }
     }

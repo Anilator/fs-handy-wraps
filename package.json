@@ -1,6 +1,6 @@
 {
   "name": "fs-handy-wraps",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Handy wraps for some Node.js FS functions",
   "main": "files.js",
   "scripts": {
@@ -11,10 +11,15 @@
     "url": "git+https://github.com/klimcode/fs-handy-wraps.git"
   },
   "keywords": [
+    "fs",
+    "node",
     "files",
     "wraps",
     "functions",
-    "callbacks"
+    "callbacks",
+    "filesystem",
+    "cli",
+    "config"
   ],
   "author": "John Klimov",
   "license": "ISC",
