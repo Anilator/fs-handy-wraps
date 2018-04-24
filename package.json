@@ -1,6 +1,6 @@
 {
   "name": "fs-handy-wraps",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Handy wraps for some Node.js FS functions",
   "main": "files.js",
   "scripts": {
@@ -26,5 +26,15 @@
   "bugs": {
     "url": "https://github.com/klimcode/fs-handy-wraps/issues"
   },
-  "homepage": "https://github.com/klimcode/fs-handy-wraps#readme"
+  "homepage": "https://github.com/klimcode/fs-handy-wraps#readme",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-jest": "^21.15.0",
+    "jest": "^22.4.3"
+  },
+  "dependencies": {
+    "fs-extra": "^5.0.0"
+  }
 }

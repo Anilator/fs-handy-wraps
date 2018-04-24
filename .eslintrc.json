@@ -1,0 +1,14 @@
+{
+    "extends": ["airbnb-base", "plugin:jest/recommended"],
+    "plugins": ["jest"],
+    "env": {
+        "jest/globals": true
+    },
+    "rules": {
+        "no-multi-spaces": 0,
+        "key-spacing": 0,
+        "no-use-before-define": 0,
+        "comma-dangle": 0,
+        "no-underscore-dangle": 0
+    }
+}
