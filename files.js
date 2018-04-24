@@ -60,7 +60,7 @@ function writeFile(path, text, successCallback, errCallback) {
   function slave(resolve, reject) {
     FS.writeFile(path, data, (err) => {
       if (err) {
-        // (`fs-handy: unable to write file "${path}"`);
+        err.message = `fs-handy: unable to write file "${path}"`;
         return reject && reject(err); // ---> exit (unable to write file)
       }
       return resolve(data); // ----> exit (file is successfully written)
@@ -80,7 +80,7 @@ function appendToFile(path, text, successCallback, errCallback) {
   function slave(resolve, reject) {
     FS.appendFile(path, data, (err) => {
       if (err) {
-        // `fs-handy: unable to append file "${path}"`;
+        err.message = `fs-handy: unable to append file "${path}"`;
         return reject && reject(err); // ----> exit (unable to append file)
       }
       return resolve && resolve(data); // ---> exit (file is successfully appended)
@@ -93,29 +93,29 @@ function readOrMakeFile(path, makeFunctionOrString, successCallback, errCallback
     : resolve => resolve('');
 
   if (successCallback) {
-    slave(successCallback);
+    slave(successCallback, errCallback);
     return this;
   }
   return new Promise(slave);
 
 
-  function slave(resolve) {
+  function slave(resolve, reject) {
     checkFileExistence(
       path,
       // ---> exit (file is exist and will be read)
-      () => resolve(path),
+      () => readFile(path, resolve, reject),
       // ---> makeCallback will return the content
-      () => makeCallback(writeCallback, errCallback)
+      () => makeCallback(writeCallback, reject)
     );
-  }
-  function writeCallback(content) {
-    writeFile(
-      path,
-      content,
-      // ---> exit (new file is created with the content provided by makeCallback)
-      successCallback,
-      errCallback // ---> exit (something went wrong)
-    );
+
+    function writeCallback(content) {
+      writeFile(
+        path,
+        content,
+        resolve, // ---> exit (new file is created with the content provided by makeCallback)
+        reject // ---> exit (something went wrong)
+      );
+    }
   }
 }
 function makeDirectories(path, successCallback, errCallback) {

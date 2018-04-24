@@ -98,11 +98,15 @@ function createNewBase (resolve, reject) {
 
 ```js
 const FILE = require('fs-handy-wraps');
-const pathFile = '~/file.txt';
-const pathDefaultFile = '~/fileDef.txt';
 
+const pathDefaultFile = 'fileDef.txt';
+const pathFile = 'file.txt';
+
+// if pathFile is already exists --> read it
+// else --> create a new file based on the another one.
 (async function start() {
     const content = await FILE.rom(pathFile, makeDefault);
+    console.log(content);
 
     async function makeDefault(resolve, reject) {
         resolve(await FILE.read(pathDefaultFile));
