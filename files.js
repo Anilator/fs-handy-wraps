@@ -1,6 +1,10 @@
 const FS = require('fs');
 const FSE = require('fs-extra'); // Temp foreign dependency
 const READLINE = require('readline');
+const HOME = require('os').homedir();
+
+
+const CWD = FS.realpathSync(process.cwd());
 
 function check(fn) { // all fs-handy functions have the required first argument
   return (...args) => {
@@ -60,8 +64,9 @@ function writeFile(path, text, successCallback, errCallback) {
   function slave(resolve, reject) {
     FS.writeFile(path, data, (err) => {
       if (err) {
-        err.message = `fs-handy: unable to write file "${path}"`;
-        return reject && reject(err); // ---> exit (unable to write file)
+        const error = err;
+        error.message = `fs-handy: unable to write file "${path}"`;
+        return reject && reject(error); // ---> exit (unable to write file)
       }
       return resolve(data); // ----> exit (file is successfully written)
     });
@@ -80,17 +85,22 @@ function appendToFile(path, text, successCallback, errCallback) {
   function slave(resolve, reject) {
     FS.appendFile(path, data, (err) => {
       if (err) {
-        err.message = `fs-handy: unable to append file "${path}"`;
-        return reject && reject(err); // ----> exit (unable to append file)
+        const error = err;
+        error.message = `fs-handy: unable to append file "${path}"`;
+        return reject && reject(error); // ----> exit (unable to append file)
       }
       return resolve && resolve(data); // ---> exit (file is successfully appended)
     });
   }
 }
 function readOrMakeFile(path, makeFunctionOrString, successCallback, errCallback) {
-  const makeCallback = typeof makeFunctionOrString === 'function'
-    ? makeFunctionOrString
-    : resolve => resolve('');
+  const argType = typeof makeFunctionOrString;
+  let makeCallback;
+
+  if (argType === 'function') makeCallback = makeFunctionOrString;
+  else if (argType === 'string') makeCallback = res => res(makeFunctionOrString);
+  else makeCallback = res => res('');
+
 
   if (successCallback) {
     slave(successCallback, errCallback);
@@ -227,6 +237,9 @@ function detectFileChanges(path, callback) {
 }
 
 module.exports = {
+  HOME,
+  CWD,
+
   check:      check(checkFileExistence),
   read:       check(readFile),
   write:      check(writeFile),

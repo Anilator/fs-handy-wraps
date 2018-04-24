@@ -8,7 +8,15 @@ A pretty simple library.
 
 ----
 
-## Read and Write files
+## Constants
+
+**HOME** is a path to the Home directory of the current OS user.
+
+**CWD** is a path to the Current Working Directory.
+
+----
+
+## Functions for Reading and Writing files
 
 All the functions are promisified. Only first argument is required.
 
@@ -24,9 +32,12 @@ All the functions are promisified. Only first argument is required.
 **append** (path[, text, successCallback, errCallback])
 > Appends `text` or an empty string to the end of the file.
 
-**rom** (path[, makeCallback, readCallback])
+**rom** (path[, make, readCallback])
 > Reads the file if it exists and calls readCallback then.
-> Creates a new file if a file specified by `path` does not exist and fills it by `newFileContent` if specified and executes `makeCallback (path, newFileContent)` then.
+> Creates a new file if it does not exist.
+> If argument `make` is not specified new file will be empty.
+> If `typeof make === string` it will be the content of the new file.
+> If `typeof make === function` it will be a callback with arguments: `(resolve, reject)`. This callback should call `resolve` with a content for the new file. See examples below.
 
 **dir** (path[, successCallback, errCallback])
 > Creates a directory specified by `path`. This function is imported from `fs-extra`. [Here is its documentation](https://github.com/jprichardson/node-fs-extra/blob/master/docs/ensureDir.md).
