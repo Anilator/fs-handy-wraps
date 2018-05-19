@@ -1,10 +1,10 @@
 {
   "name": "fs-handy-wraps",
-  "version": "3.0.2",
-  "description": "Handy wraps for some Node.js FS functions",
+  "version": "4.0.0",
+  "description": "Handy wraps for Node.js FS functions",
   "main": "files.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -35,6 +35,7 @@
     "jest": "^22.4.3"
   },
   "dependencies": {
+    "brief-switch": "^0.2.0",
     "fs-extra": "^5.0.0"
   }
 }

@@ -1,4 +1,5 @@
-/test
+.eslint.json
+test.js
 
 # IDE workspaces
 *.sublime-project

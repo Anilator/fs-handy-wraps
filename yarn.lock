@@ -420,6 +420,10 @@ braces@^2.3.1:
     split-string "^3.0.2"
     to-regex "^3.0.1"
 
+brief-switch@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/brief-switch/-/brief-switch-0.2.0.tgz#2e161e56f6ecc1fe3152bd022d13622e622c5d75"
+
 browser-process-hrtime@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/browser-process-hrtime/-/browser-process-hrtime-0.1.2.tgz#425d68a58d3447f02a04aa894187fce8af8b7b8e"

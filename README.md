@@ -1,6 +1,6 @@
 # Handy Wraps for Node.js FS
 
-A pretty simple library.
+A pretty simple library. It uses `fs-extra` under the hood.
 
 ## Installation
 
@@ -13,6 +13,8 @@ A pretty simple library.
 **HOME** is a path to the Home directory of the current OS user.
 
 **CWD** is a path to the Current Working Directory.
+
+**fse** is an object that exposes `fs-extra` functions as is.
 
 ----
 
@@ -27,7 +29,10 @@ All the functions are promisified. Only first argument is required.
 > Reads the file contents.
 
 **write** (path[, text, successCallback, errCallback])
-> Rewrites the file content by `text` or an empty string. Also may be used for a new file creation.
+> Rewrites the file content by `text` or an empty string. Also may be used for a new file creation. If the target folder does not exist, it will be created.
+
+**rm** (path)
+> Removes specified file of folder as it `rm -rf` does. Resolves to a `true` value if succeeded.
 
 **append** (path[, text, successCallback, errCallback])
 > Appends `text` or an empty string to the end of the file.
@@ -65,6 +70,8 @@ A callback `successCallback (config)` will be executed in the result.
 ----
 
 ## Watching on file changes
+
+**Only for for testing purposes**. In production, use `chokidar` instead.
 
 This function cannot be promisified.
 

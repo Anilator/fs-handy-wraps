@@ -1,7 +1,8 @@
-const FS = require('fs');
-const FSE = require('fs-extra'); // Temp foreign dependency
+const FS = require('fs'); // Temp dependency
+const FSE = require('fs-extra');
 const READLINE = require('readline');
 const HOME = require('os').homedir();
+const SWTCH = require('brief-switch');
 
 
 const CWD = FS.realpathSync(process.cwd());
@@ -62,13 +63,32 @@ function writeFile(path, text, successCallback, errCallback) {
 
 
   function slave(resolve, reject) {
-    FS.writeFile(path, data, (err) => {
+    FSE.outputFile(path, data, (err) => {
       if (err) {
         const error = err;
         error.message = `fs-handy: unable to write file "${path}"`;
         return reject && reject(error); // ---> exit (unable to write file)
       }
       return resolve(data); // ----> exit (file is successfully written)
+    });
+  }
+}
+function remove(path, successCallback, errCallback) {
+  if (successCallback) {
+    slave(successCallback, errCallback);
+    return this;
+  }
+  return new Promise(slave);
+
+
+  function slave(resolve, reject) {
+    FSE.remove(path, (err) => {
+      if (err) {
+        const error = err;
+        error.message = `fs-handy: unable to remove "${path}"`;
+        return reject && reject(error); // --------------------> exit
+      }
+      return resolve(true); // ----> exit (file of folder is successfully removed)
     });
   }
 }
@@ -95,11 +115,11 @@ function appendToFile(path, text, successCallback, errCallback) {
 }
 function readOrMakeFile(path, makeFunctionOrString, successCallback, errCallback) {
   const argType = typeof makeFunctionOrString;
-  let makeCallback;
-
-  if (argType === 'function') makeCallback = makeFunctionOrString;
-  else if (argType === 'string') makeCallback = res => res(makeFunctionOrString);
-  else makeCallback = res => res('');
+  const makeCallback = SWTCH(argType, [
+    'function', makeFunctionOrString,
+    'string',   res => res(makeFunctionOrString),
+    res => res(''),
+  ]);
 
 
   if (successCallback) {
@@ -168,8 +188,8 @@ function getConfig(path, defaultValues, CLIQuestions, successCallback, errCallba
   function slave(resolve, reject) {
     readOrMakeFile(
       path,
-      checkConfigReadability,
       createConfig,
+      checkConfigReadability,
       reject
     );
 
@@ -183,7 +203,7 @@ function getConfig(path, defaultValues, CLIQuestions, successCallback, errCallba
         else throw new Error('fs-handy: config-file contains incorrect JSON');
       }
     }
-    function createConfig() {
+    function createConfig(returnResults, returnError) {
       if (CLIQuestions) ask();
       else assignDefaults({});
 
@@ -193,6 +213,7 @@ function getConfig(path, defaultValues, CLIQuestions, successCallback, errCallba
           output: process.stdout,
         });
         let currentLine = CLIQuestions.shift();
+        if (!currentLine) returnError('fs-handy: CLI Error');
 
 
         rl.question(`${currentLine.question} \n`, answerCallback);
@@ -212,14 +233,7 @@ function getConfig(path, defaultValues, CLIQuestions, successCallback, errCallba
       }
       function assignDefaults(CLIanswers) {
         const configResult = Object.assign(defaults, CLIanswers);
-        writeConfigFile(configResult);
-      }
-      function writeConfigFile(config) {
-        writeFile(
-          path,
-          JSON.stringify(config, null, 2),
-          resolve  // ------------------> exit (new config goes outside)
-        );
+        returnResults(JSON.stringify(configResult, null, 2));
       }
     }
   }
@@ -239,10 +253,12 @@ function detectFileChanges(path, callback) {
 module.exports = {
   HOME,
   CWD,
+  fse: FSE,
 
   check:      check(checkFileExistence),
   read:       check(readFile),
   write:      check(writeFile),
+  rm:         check(remove),
   append:     check(appendToFile),
   rom:        check(readOrMakeFile),
   dir:        check(makeDirectories),
