@@ -12,9 +12,28 @@ test('remove test', async () => {
   expect(res).toBe(true);
 });
 
-test('getConfig test', async () => {
-  const fnDef = () => (console.log('Default config created'), ({ test: 'ok' }));
+test('getConfig promise test', async () => {
+  const fnPromDef = () => {
+    console.log('Default config got from a promise');
+    return Promise.resolve({ test: 'ok' });
+  };
+  const res = await FILE.getConfig(testFile, fnPromDef);
+  expect(res.test).toBe('ok');
+  await FILE.rm(testDir);
+});
+test('getConfig Function test', async () => {
+  const fnDef = () => {
+    console.log('Default config got from a function');
+    return { test: 'ok' };
+  };
   const res = await FILE.getConfig(testFile, fnDef);
+  expect(res.test).toBe('ok');
+  await FILE.rm(testDir);
+});
+test('getConfig Object test', async () => {
+  const objDef = { test: 'ok' };
+  // there is no way to notify about a default config with just an object
+  const res = await FILE.getConfig(testFile, objDef);
   expect(res.test).toBe('ok');
   await FILE.rm(testDir);
 });

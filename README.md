@@ -51,9 +51,11 @@ All the functions are promisified. Only first argument is required.
 
 ## Read or Create a JSON config-file using simple CLI
 
-**getConfig** (path[, defaultValues, CLIQuestions, successCallback, errCallback])
+**getConfig** (path[, defProvider, CLIQuestions, successCallback, errCallback])
 > Reads the `path` file, checks if for JSON errors and calls `successCallback (parsedConfig)`.
-> Launches a simple CLI according to `CLIQuestions` if the `path` file does not exist.
+> If the file does not exist -- creates it according to default content provided by `defProvider`.
+> `defProvider` may be: an object or a function that returns an object or a promise.
+> If `CLIQuestions` specified, a simple CLI will be started.
 Example for `CLIQuestions` object:
 
 ```js
@@ -64,7 +66,7 @@ const CLIQuestions_EXAMPLE = [
 ];
 ```
 
-It asks `CLIQuestions` to user, then assigns received values to a `defaultValues` object.
+It asks `CLIQuestions` to user, then assigns received values to a default object.
 A callback `successCallback (config)` will be executed in the result.
 
 ----

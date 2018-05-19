@@ -168,7 +168,7 @@ function makeDirectories(path, successCallback, errCallback) {
   }
 }
 
-function getConfig(path, defValues, CLIQuestions, successCallback, errCallback) {
+function getConfig(path, defProvider, CLIQuestions, successCallback, errCallback) {
   /*
   const CLIQuestions_EXAMPLE = [
     { prop: 'pathToBase',       question: 'Full path to database file:' },
@@ -176,7 +176,6 @@ function getConfig(path, defValues, CLIQuestions, successCallback, errCallback) 
     { prop: 'editor',           question: 'Command to open your text editor:' },
   ];
   */
-  const defaults = (typeof defValues === 'function' ? defValues() : defValues) || {};
   const CLIAnswers = {};
 
   if (successCallback) {
@@ -232,8 +231,24 @@ function getConfig(path, defValues, CLIQuestions, successCallback, errCallback) 
         }
       }
       function assignDefaults(CLIanswers) {
-        const configResult = Object.assign(defaults, CLIanswers);
-        returnResults(JSON.stringify(configResult, null, 2));
+        // defProvider may be a function or an object
+        if (typeof defProvider === 'function') {
+          // defProvider is a function that returns a default config object or parseable string
+          Promise.resolve(defProvider()).then((defValue) => {
+            const defaults = (typeof defValue === 'object')
+              ? defValue
+              : JSON.parse(defValue);
+
+            assign(defaults, CLIanswers);
+          });
+        } else {
+          assign(defProvider, CLIanswers);
+        }
+
+        function assign(def, cli) {
+          const configResult = Object.assign(def, cli);
+          returnResults(JSON.stringify(configResult, null, 2));
+        }
       }
     }
   }
