@@ -168,7 +168,7 @@ function makeDirectories(path, successCallback, errCallback) {
   }
 }
 
-function getConfig(path, defaultValues, CLIQuestions, successCallback, errCallback) {
+function getConfig(path, defValues, CLIQuestions, successCallback, errCallback) {
   /*
   const CLIQuestions_EXAMPLE = [
     { prop: 'pathToBase',       question: 'Full path to database file:' },
@@ -176,7 +176,7 @@ function getConfig(path, defaultValues, CLIQuestions, successCallback, errCallba
     { prop: 'editor',           question: 'Command to open your text editor:' },
   ];
   */
-  const defaults = defaultValues || {};
+  const defaults = (typeof defValues === 'function' ? defValues() : defValues) || {};
   const CLIAnswers = {};
 
   if (successCallback) {

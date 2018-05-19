@@ -13,7 +13,8 @@ test('remove test', async () => {
 });
 
 test('getConfig test', async () => {
-  const res = await FILE.getConfig(testFile, { test: 'ok' });
+  const fnDef = () => (console.log('Default config created'), ({ test: 'ok' }));
+  const res = await FILE.getConfig(testFile, fnDef);
   expect(res.test).toBe('ok');
   await FILE.rm(testDir);
 });
